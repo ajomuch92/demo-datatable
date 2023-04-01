@@ -3,6 +3,7 @@
     <section class="flex justify-between mb-3">
       <input v-if="searchable" type="search" v-model="search" placeholder="Search..." class="py-1 px-2 border-gray-200 border rounded-md"/>
       <div>
+        <column-selector v-if="showColumnSelector" :columns="columns" @on-visible-columns="visibleColumns=$event" />
         <button class="p-2 bg-blue-600 hover:bg-blue-800 text-white rounded-md shadow-sm mx-2" @click="downloadContent">
           Download
         </button>
@@ -18,7 +19,7 @@
 							</div>
 						</th>
           <th
-            v-for="(column, index) in columns"
+            v-for="(column, index) in columnsFiltered"
             :key="index"
             class="px-6 py-3"
             :class="column.className"
@@ -34,7 +35,7 @@
               <input :value="row[valueField]" v-model="checked" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
             </div>
           </td>
-          <td v-for="(column, columnIndex) in columns" :key="columnIndex" class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
+          <td v-for="(column, columnIndex) in columnsFiltered" :key="columnIndex" class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
             <slot :name="column.field" v-bind="{row, index: rowIndex}">
               {{ row[column.field] }}
             </slot>
@@ -60,6 +61,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { IColumn } from '../interfaces';
+import ColumnSelector from './ColumnSelector.vue';
 
 const emit = defineEmits(['update:checkedRows']);
 
@@ -100,6 +102,10 @@ const props = defineProps({
   searchable: {
     type: Boolean,
     default: true,
+  },
+  showColumnSelector: {
+    type: Boolean,
+    default: true,
   }
 });
 
@@ -111,6 +117,7 @@ const checked = ref<string[]|number[]>([]);
 
 const allChecked = ref(false);
 
+const visibleColumns = ref([]);
 
 rowsClone.value = [...props.rows] || [];
 
@@ -119,7 +126,7 @@ watch(allChecked, (val: Boolean) => {
 });
 
 watch(checked, () => {
-  const itemsToEmit = [...rowsClone.value.filter((r) => checked.value.includes(r[props.valueField] as any))];
+  const itemsToEmit = [...rowsClone.value.filter((r) => checked.value.includes(r[props.valueField]))];
   emit('update:checkedRows', itemsToEmit);
 });
 
@@ -132,6 +139,13 @@ const rowsFiltered = computed(() => {
     return items;
   }
   return rowsClone.value;
+});
+
+const columnsFiltered = computed(() => {
+  if (visibleColumns.value.length) {
+    return props.columns.filter((r) => visibleColumns.value.includes(r.field));
+  }
+  return props.columns;
 });
 
 function downloadContent(){
