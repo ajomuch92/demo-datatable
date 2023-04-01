@@ -1,2 +1,2 @@
-export type { default as  Deal } from './deal';
-export type { default as Document } from './document';
+export type { default as  IDeal } from './deal';
+export type { default as IDocument } from './document';

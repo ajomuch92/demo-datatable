@@ -1,4 +1,4 @@
-export default interface Document {
+export default interface IDocument {
   id?: Number;
   dealId?: Number;
   documentName?: String;
