@@ -11,9 +11,9 @@
     <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
       <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
         <tr>
-          <th v-if="selectable" class="p-4">
+          <th v-if="checkable" class="p-4">
 							<div class="flex items-center">
-								<input id="checkbox-all-search" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+								<input v-model="allChecked" id="checkbox-all-search" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
 								<label for="checkbox-all-search" class="sr-only">checkbox</label>
 							</div>
 						</th>
@@ -29,6 +29,11 @@
       </thead>
       <tbody>
         <tr v-for="(row, rowIndex) in rowsFiltered" :key="rowIndex" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+          <td v-if="checkable" class="w-4 p-4">
+            <div class="flex items-center">
+              <input :value="row[valueField]" v-model="checked" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
+            </div>
+          </td>
           <td v-for="(column, columnIndex) in columns" :key="columnIndex" class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
             <slot :name="column.field" v-bind="{row, index: rowIndex}">
               {{ row[column.field] }}
@@ -53,8 +58,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { IColumn } from '../interfaces';
+
+const emit = defineEmits(['update:checkedRows']);
 
 const props = defineProps({
   columns: {
@@ -100,9 +107,21 @@ const rowsClone = ref<any[]>([]);
 
 const search = ref<string>('');
 
+const checked = ref<string[]|number[]>([]);
+
+const allChecked = ref(false);
+
 
 rowsClone.value = [...props.rows] || [];
 
+watch(allChecked, (val: Boolean) => {
+  checked.value = val ? rowsClone.value.map((r) => r[props.valueField]) : [];
+});
+
+watch(checked, () => {
+  const itemsToEmit = [...rowsClone.value.filter((r) => checked.value.includes(r[props.valueField]))];
+  emit('update:checkedRows', itemsToEmit);
+});
 const rowsFiltered = computed(() => {
   if (search.value.length) {
     const items = rowsClone.value.filter(r => {
