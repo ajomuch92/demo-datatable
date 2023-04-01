@@ -25,7 +25,10 @@
             class="px-6 py-3"
             :class="column.className"
           >
-            {{ column.label }}
+            <span :class="{'cursor-pointer select-none': column.sortable}" @click="setSortOrder(column)">
+              {{ column.label }}
+              <icon class="text-gray-500 text-base" v-if="sortField.field===column.field" :name="sortField.order==='DESC'? 'arrow-down-short':'arrow-up-short'" />
+            </span>
           </th>
         </tr>
       </thead>
@@ -77,6 +80,11 @@ import { IColumn } from '../interfaces';
 import ColumnSelector from './ColumnSelector.vue';
 import Icon from './Icon.vue';
 import Pagination from './Pagination.vue';
+
+interface ISort {
+  field?: string;
+  order?: 'DESC' | 'ASC';
+}
 
 const emit = defineEmits(['update:checkedRows']);
 
@@ -143,6 +151,8 @@ rowsClone.value = [...props.rows] || [];
 const rowsPerPage = ref(props.rowsPerPageArr[0]);
 const activePage = ref(1);
 
+const sortField = ref<ISort>({});
+
 watch(allChecked, (val: Boolean) => {
   checked.value = val ? rowsClone.value.map((r) => r[props.valueField]) : [];
 });
@@ -153,14 +163,19 @@ watch(checked, () => {
 });
 
 const rowsFiltered = computed(() => {
+  let items: any[] = [];
   if (search.value.length) {
-    const items = rowsClone.value.filter(r => {
+    items = rowsClone.value.filter(r => {
       const values = Object.values(r);
       return values.some(v => v?.toString().toLowerCase().includes(search.value.toLowerCase()) || false);
     });
-    return items;
+  } else {
+    items = rowsClone.value;
   }
-  return rowsClone.value;
+  if (Object.keys(sortField).length > 0) {
+    return sortRows(items);
+  }
+  return items;
 });
 
 const columnsFiltered = computed(() => {
@@ -196,6 +211,42 @@ function rowVisibility(index: Number): Boolean {
   const last: Number = activePage.value * rowsPerPageVal;
   const first: Number = (last as number) - rowsPerPageVal + 1
   return index >= first && index <= last;
+}
+
+function setSortOrder(column: IColumn) {
+  const { field, sortable } = column;
+  if (sortable) {
+    if (sortField.value.field !== field) {
+      sortField.value = {
+        field,
+        order: 'DESC',
+      }
+    } else if (sortField.value.field === field && sortField.value.order === 'DESC') {
+      sortField.value = {
+        field,
+        order: 'ASC',
+      }
+    } else {
+      sortField.value = {};
+    }
+  }
+}
+
+function sortRows(arr: any[]): any[] {
+  const { field, order } = sortField.value;
+  return arr.sort((a, b) => {
+    let comparison = 0;
+    const valA = a[field || ''];
+    const valB = b[field || ''];
+
+    if (valA > valB) {
+      comparison = 1;
+    } else if (valA < valB) {
+      comparison = -1;
+    }
+
+    return order === 'DESC' ? comparison * -1 : comparison;
+  });
 }
 
 </script>
