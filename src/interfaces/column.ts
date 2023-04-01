@@ -1,4 +1,4 @@
-export interface IColumn {
+export default interface IColumn {
   label: string;
   field: string;
   sortable?: Boolean;
