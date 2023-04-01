@@ -119,9 +119,10 @@ watch(allChecked, (val: Boolean) => {
 });
 
 watch(checked, () => {
-  const itemsToEmit = [...rowsClone.value.filter((r) => checked.value.includes(r[props.valueField]))];
+  const itemsToEmit = [...rowsClone.value.filter((r) => checked.value.includes(r[props.valueField] as any))];
   emit('update:checkedRows', itemsToEmit);
 });
+
 const rowsFiltered = computed(() => {
   if (search.value.length) {
     const items = rowsClone.value.filter(r => {
@@ -142,7 +143,7 @@ function downloadContent(){
     csv += Object.values(item).join(', ');
     csv += '\n';
   }
-  const csvFile = new Blob([csv], {type: 'text/csv'});
+  const csvFile = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
   const downloadLink = document.createElement('a');
   downloadLink.download = `data-table-content-${Date.now()}.csv`;
   downloadLink.href = window.URL.createObjectURL(csvFile);
