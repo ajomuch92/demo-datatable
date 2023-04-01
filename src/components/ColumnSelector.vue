@@ -2,6 +2,7 @@
   <div class="relative inline-block">
     <button class="p-2 bg-gray-100 hover:bg-gray-300 rounded-md shadow-sm mx-2" @click="show=!show">
       Columns
+      <icon name="columns" />
     </button>
     <span ref="refContainer" v-show="show" class="absolute bg-white shadow-sm rounded-md min-w-max p-4 border border-gray-400 selector">
       <p class="font-bold">{{ label }}</p>
@@ -18,6 +19,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
 import { IColumn } from '../interfaces';
+import Icon from './Icon.vue';
 
 const emit = defineEmits(['on-visible-columns']);
 

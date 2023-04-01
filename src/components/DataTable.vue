@@ -6,6 +6,7 @@
         <column-selector v-if="showColumnSelector" :columns="columns" @on-visible-columns="visibleColumns=$event" />
         <button class="p-2 bg-blue-600 hover:bg-blue-800 text-white rounded-md shadow-sm mx-2" @click="downloadContent">
           Download
+          <icon name="download" />
         </button>
       </div>
     </section>
@@ -62,6 +63,7 @@
 import { ref, computed, watch } from 'vue';
 import { IColumn } from '../interfaces';
 import ColumnSelector from './ColumnSelector.vue';
+import Icon from './Icon.vue';
 
 const emit = defineEmits(['update:checkedRows']);
 
