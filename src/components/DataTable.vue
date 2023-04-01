@@ -30,7 +30,12 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(row, rowIndex) in rowsFiltered" :key="rowIndex" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+        <tr
+          v-for="(row, rowIndex) in rowsFiltered"
+          :key="rowIndex"
+          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+          v-show="rowVisibility(rowIndex+1)"
+        >
           <td v-if="checkable" class="w-4 p-4">
             <div class="flex items-center">
               <input :value="row[valueField]" v-model="checked" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
@@ -56,6 +61,13 @@
         </tr>
       </tbody>
     </table>
+    <div class="flex items-center justify-end mt-2">
+      <label>Rows per page:</label>
+      <select v-model.number="rowsPerPage" class="border border-gray-300 mx-2 p-1 rounded-md">
+        <option v-for="(option, key) in rowsPerPageArr" :key="key" :value="option">{{ option }}</option>
+      </select>
+      <pagination :total-pages="totalPages" @on-active-page="activePage=$event" />
+    </div>
   </div>
 </template>
 
@@ -64,6 +76,7 @@ import { ref, computed, watch } from 'vue';
 import { IColumn } from '../interfaces';
 import ColumnSelector from './ColumnSelector.vue';
 import Icon from './Icon.vue';
+import Pagination from './Pagination.vue';
 
 const emit = defineEmits(['update:checkedRows']);
 
@@ -108,6 +121,10 @@ const props = defineProps({
   showColumnSelector: {
     type: Boolean,
     default: true,
+  },
+  rowsPerPageArr: {
+    type: Array<Number | number>,
+    default: () => [5, 10, 25, 50]
   }
 });
 
@@ -122,6 +139,9 @@ const allChecked = ref(false);
 const visibleColumns = ref([]);
 
 rowsClone.value = [...props.rows] || [];
+
+const rowsPerPage = ref(props.rowsPerPageArr[0]);
+const activePage = ref(1);
 
 watch(allChecked, (val: Boolean) => {
   checked.value = val ? rowsClone.value.map((r) => r[props.valueField]) : [];
@@ -150,6 +170,8 @@ const columnsFiltered = computed(() => {
   return props.columns;
 });
 
+const totalPages = computed(() => Math.ceil(rowsFiltered.value.length / rowsPerPage.value));
+
 function downloadContent(){
   let csv = '';
   csv += props.columns.map((r) => r.field).join(', ');
@@ -169,5 +191,10 @@ function downloadContent(){
   document.body.removeChild(downloadLink);
 }
 
+function rowVisibility(index: Number): Boolean {
+  const last: Number = activePage.value * rowsPerPage.value;
+  const first: Number = (last as number) - rowsPerPage.value + 1
+  return index >= first && index <= last;
+}
 
 </script>
