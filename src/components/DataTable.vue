@@ -1,5 +1,10 @@
 <template>
   <div class="data-table-wrapper">
+      <div>
+        <button class="p-2 bg-blue-600 hover:bg-blue-800 text-white rounded-md shadow-sm mx-2" @click="downloadContent">
+          Download
+        </button>
+      </div>
     <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
       <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
         <tr>
@@ -69,17 +74,22 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  selectable: {
+  downloadType: {
+    type: String,
+    default: 'all',
+    validator: (val: string) => ['all', 'filtered'].includes(val)
+  },
+  checkable: {
     type: Boolean,
     default: false,
-  },
-  search: {
-    type: String,
-    default: '',
   },
   noDataText: {
     type: String,
     default: 'No data available',
+  },
+  searchable: {
+    type: Boolean,
+    default: true,
   }
 });
 
@@ -98,6 +108,25 @@ const rowsFiltered = computed(() => {
   }
   return rowsClone.value;
 });
+
+function downloadContent(){
+  let csv = '';
+  csv += props.columns.map((r) => r.field).join(', ');
+  csv += '\n';
+  const items = props.downloadType === 'all' ? rowsClone.value : rowsFiltered.value;
+  for(const item of items) {
+    csv += Object.values(item).join(', ');
+    csv += '\n';
+  }
+  const csvFile = new Blob([csv], {type: 'text/csv'});
+  const downloadLink = document.createElement('a');
+  downloadLink.download = `data-table-content-${Date.now()}.csv`;
+  downloadLink.href = window.URL.createObjectURL(csvFile);
+  downloadLink.style.display = 'none';
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
+}
 
 
 </script>
