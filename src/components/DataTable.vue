@@ -1,10 +1,13 @@
 <template>
   <div class="data-table-wrapper">
+    <section class="flex justify-between mb-3">
+      <input v-if="searchable" type="search" v-model="search" placeholder="Search..." class="py-1 px-2 border-gray-200 border rounded-md"/>
       <div>
         <button class="p-2 bg-blue-600 hover:bg-blue-800 text-white rounded-md shadow-sm mx-2" @click="downloadContent">
           Download
         </button>
       </div>
+    </section>
     <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
       <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
         <tr>
@@ -95,14 +98,16 @@ const props = defineProps({
 
 const rowsClone = ref<any[]>([]);
 
+const search = ref<string>('');
+
 
 rowsClone.value = [...props.rows] || [];
 
 const rowsFiltered = computed(() => {
-  if (props.search.length) {
+  if (search.value.length) {
     const items = rowsClone.value.filter(r => {
       const values = Object.values(r);
-      return values.some(v => v?.toString().toLowerCase().includes(props.search.toLowerCase()) || false);
+      return values.some(v => v?.toString().toLowerCase().includes(search.value.toLowerCase()) || false);
     });
     return items;
   }
