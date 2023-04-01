@@ -132,11 +132,11 @@ const rowsClone = ref<any[]>([]);
 
 const search = ref<string>('');
 
-const checked = ref<string[]|number[]>([]);
+const checked = ref<any[]>([]);
 
 const allChecked = ref(false);
 
-const visibleColumns = ref([]);
+const visibleColumns = ref<any[]>([]);
 
 rowsClone.value = [...props.rows] || [];
 
@@ -170,11 +170,11 @@ const columnsFiltered = computed(() => {
   return props.columns;
 });
 
-const totalPages = computed(() => Math.ceil(rowsFiltered.value.length / rowsPerPage.value));
+const totalPages = computed(() => Math.ceil(rowsFiltered.value.length / (rowsPerPage.value as number)));
 
 function downloadContent(){
   let csv = '';
-  csv += props.columns.map((r) => r.field).join(', ');
+  csv += props.columns.map((r) => r.label).join(', ');
   csv += '\n';
   const items = props.downloadType === 'all' ? rowsClone.value : rowsFiltered.value;
   for(const item of items) {
@@ -192,8 +192,9 @@ function downloadContent(){
 }
 
 function rowVisibility(index: Number): Boolean {
-  const last: Number = activePage.value * rowsPerPage.value;
-  const first: Number = (last as number) - rowsPerPage.value + 1
+  const rowsPerPageVal = (rowsPerPage.value as number);
+  const last: Number = activePage.value * rowsPerPageVal;
+  const first: Number = (last as number) - rowsPerPageVal + 1
   return index >= first && index <= last;
 }
 
