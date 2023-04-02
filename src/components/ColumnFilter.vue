@@ -1,9 +1,9 @@
 <template>
-  <div class="relative inline-block" v-click-outside="() => show=false">
-    <button class="p-2 w-8 h-8 hover:bg-gray-300 rounded-full shadow-sm mx-2" @click="show=!show">
+  <bottom-interactive-tooltip>
+    <button class="p-2 w-8 h-8 hover:bg-gray-300 rounded-full shadow-sm mx-2">
       <icon name="funnel" />
     </button>
-    <span ref="refContainer" v-show="show" class="absolute bg-white shadow-md rounded-md min-w-max p-4 border border-gray-100 filter">
+    <template #content>
       <input type="search" v-model="search" placeholder="Search..." class="p-1 border-gray-200 border rounded-md"/>
       <div class="px-1 flex flex-col items-container mt-1">
         <label v-for="(item, index) in uniqueItems" :key="index" class="cursor-pointer my-1">
@@ -11,13 +11,14 @@
           {{ item }}
         </label>
       </div>
-    </span>
-  </div>
+    </template>
+  </bottom-interactive-tooltip>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue';
 import Icon from './Icon.vue';
+import BottomInteractiveTooltip from './BottomInteractiveTooltip.vue';
 
 const emit = defineEmits(['update:value']);
 
@@ -32,17 +33,10 @@ const props = defineProps({
   }
 });
 
-const refContainer = ref(undefined);
-
-const containerHeight = ref(0);
 
 const visibleColumns = ref<string[]>([]);
 
-const show = ref(false);
-
 const search = ref('');
-
-const bottomOffset = computed(() => `-${containerHeight.value + 10}px`);
 
 const uniqueItems = computed(() => {
   const uniqItems = [...new Set(props.items.filter((r) => !!r))];
@@ -52,35 +46,15 @@ const uniqueItems = computed(() => {
   return uniqItems;
 });
 
-watch(show, (val: Boolean) => {
-  if (val) {
-    updateOffset();
-  }
-});
 
 watch(visibleColumns, (val) => {
   emit('update:value', val);
-  updateOffset();
 });
 
-
-function updateOffset() {
-  nextTick(() => {
-    const el = refContainer.value;
-    containerHeight.value = (el as any)?.clientHeight || 0;
-  });
-}
 
 </script>
 
 <style scoped>
-  .filter {
-    bottom: v-bind(bottomOffset);
-    left: 50%;
-    transform: translateX(-50%);
-    min-width: 150px;
-  }
-
   .items-container {
     max-height: 150px;
     overflow-y: scroll;
