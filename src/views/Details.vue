@@ -6,7 +6,7 @@
       </router-link>
       Details
     </h1>
-    <data-table :columns="columns" :rows="documents" checkable :downloadable="false" />
+    <data-table :columns="columns" :rows="documents" :checkable="false" :downloadable="false" />
   </main>
 </template>
 
