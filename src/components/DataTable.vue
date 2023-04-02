@@ -23,11 +23,12 @@
             v-for="(column, index) in columnsFiltered"
             :key="index"
             class="px-6 py-3"
-            :class="column.className"
+            :class="column.headerClass"
           >
+            <column-filter v-if="column.filterable" v-model:value="filters[column.field]" :items="getFilterValuesByColumn(column.field)" />
             <span :class="{'cursor-pointer select-none': column.sortable}" @click="setSortOrder(column)">
               {{ column.label }}
-              <icon class="text-gray-500 text-base" v-if="sortField.field===column.field" :name="sortField.order==='DESC'? 'arrow-down-short':'arrow-up-short'" />
+              <icon v-if="sortField.field===column.field" class="text-gray-500 text-base" :name="sortField.order==='DESC'? 'arrow-down-short':'arrow-up-short'" />
             </span>
           </th>
         </tr>
@@ -44,7 +45,13 @@
               <input :value="row[valueField]" v-model="checked" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
             </div>
           </td>
-          <td v-for="(column, columnIndex) in columnsFiltered" :key="columnIndex" class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
+          <td
+            v-for="(column, columnIndex) in columnsFiltered"
+            :key="columnIndex"
+            class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap"
+            :class="column.cellClass"
+            :style="{width: column.width || 'auto'}"
+          >
             <slot :name="column.field" v-bind="{row, index: rowIndex}">
               {{ row[column.field] }}
             </slot>
@@ -57,9 +64,14 @@
             </slot>
           </td>
         </tr>
-        <tr v-else-if="rowsFiltered.length===0">
+        <tr v-else-if="rowsFiltered.length===0&&search.length">
           <td class="text-sm text-slate-500 font-medium px-6 whitespace-nowrap text-center" :colspan="columns.length">
             No matches for '{{ search }}'
+          </td>
+        </tr>
+        <tr v-else-if="rowsFiltered.length===0&&search.length===0">
+          <td class="text-sm text-slate-500 font-medium px-6 whitespace-nowrap text-center" :colspan="columns.length">
+            No matches for these filters
           </td>
         </tr>
       </tbody>
@@ -80,11 +92,14 @@ import { IColumn } from '../interfaces';
 import ColumnSelector from './ColumnSelector.vue';
 import Icon from './Icon.vue';
 import Pagination from './Pagination.vue';
+import ColumnFilter from './ColumnFilter.vue';
 
 interface ISort {
   field?: string;
   order?: 'DESC' | 'ASC';
 }
+
+type Filter = {[key: string]: any[]}
 
 const emit = defineEmits(['update:checkedRows']);
 
@@ -153,6 +168,8 @@ const activePage = ref(1);
 
 const sortField = ref<ISort>({});
 
+const filters = ref<Filter>({});
+
 watch(allChecked, (val: Boolean) => {
   checked.value = val ? rowsClone.value.map((r) => r[props.valueField]) : [];
 });
@@ -173,7 +190,15 @@ const rowsFiltered = computed(() => {
     items = rowsClone.value;
   }
   if (Object.keys(sortField).length > 0) {
-    return sortRows(items);
+    items = sortRows(items);
+  }
+  const keysFilter = Object.keys(filters.value);
+  for (let i = 0; i < keysFilter.length; i += 1) {
+    const key: string = keysFilter[i];
+    const valueArr: string[] = filters.value[key];
+    if (valueArr.length) {
+      items = items.filter((r) => valueArr.includes(r[key]))
+    }
   }
   return items;
 });
@@ -248,5 +273,17 @@ function sortRows(arr: any[]): any[] {
     return order === 'DESC' ? comparison * -1 : comparison;
   });
 }
+
+function getFilterValuesByColumn(field: string): string[] {
+  const rows = rowsClone.value;
+  const values: string[] = rows.map((r) => `${r[field]}`);
+  return values;
+}
+
+function setFiltersArr() {
+  filters.value = props.columns.map((r) => r.field).reduce((prev, curr) => ({...prev, [curr]: []}), {});
+}
+
+setFiltersArr();
 
 </script>
