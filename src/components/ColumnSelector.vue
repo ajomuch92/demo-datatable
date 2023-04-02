@@ -1,10 +1,10 @@
 <template>
-  <div class="relative inline-block">
+  <div class="relative inline-block" v-click-outside="() => show=false">
     <button class="p-2 bg-gray-100 hover:bg-gray-300 rounded-md shadow-sm mx-2" @click="show=!show">
       Columns
       <icon name="columns" />
     </button>
-    <span ref="refContainer" v-show="show" class="absolute bg-white shadow-sm rounded-md min-w-max p-4 border border-gray-400 selector">
+    <span ref="refContainer" v-show="show" class="absolute bg-white shadow-md rounded-md min-w-max p-4 border border-gray-100 selector">
       <p class="font-bold">{{ label }}</p>
       <div class="px-1 flex flex-col">
         <label v-for="(column, index) in columns" :key="index" class="cursor-pointer">
