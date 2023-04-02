@@ -58,19 +58,19 @@
           </td>
         </tr>
         <tr v-if="rows.length===0">
-          <td class="text-sm text-slate-500 font-medium px-6 whitespace-nowrap text-center" :colspan="columns.length">
+          <td class="text-sm text-slate-500 font-medium px-6 whitespace-nowrap text-center" :colspan="columns.length+(checkable? 1: 0)">
             <slot name="no-data">
               {{noDataText}}
             </slot>
           </td>
         </tr>
         <tr v-else-if="rowsFiltered.length===0&&search.length">
-          <td class="text-sm text-slate-500 font-medium px-6 whitespace-nowrap text-center" :colspan="columns.length">
+          <td class="text-sm text-slate-500 font-medium px-6 whitespace-nowrap text-center" :colspan="columns.length+(checkable? 1: 0)">
             No matches for '{{ search }}'
           </td>
         </tr>
         <tr v-else-if="rowsFiltered.length===0&&search.length===0">
-          <td class="text-sm text-slate-500 font-medium px-6 whitespace-nowrap text-center" :colspan="columns.length">
+          <td class="text-sm text-slate-500 font-medium px-6 whitespace-nowrap text-center" :colspan="columns.length+(checkable? 1: 0)">
             No matches for these filters
           </td>
         </tr>
