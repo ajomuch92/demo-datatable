@@ -27,8 +27,9 @@ export function getDocumentsByDealId(dealId: Number): IDocument[] {
 function populateDeal(holding: any): IDeal {
   const { ClientIssuers, Industries, Agents, Sources } = dealJson.data;
   const deal: IDeal = {};
-  const { Id, DealName, IndustryId, Access, AgentId, SourceId, IssuerId } = holding;
+  const { Id, DealName, DealId, IndustryId, Access, AgentId, SourceId, IssuerId } = holding;
   deal.id = Id;
+  deal.dealId = DealId;
   deal.issuer = findFieldOnArray(ClientIssuers, IssuerId, 'IssuerName', 'IssuerId');
   deal.dealName = DealName;
   deal.industry = findFieldOnArray(Industries, IndustryId, 'IndustryName');

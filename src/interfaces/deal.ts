@@ -1,5 +1,6 @@
 export default interface IDeal {
   id?: Number;
+  dealId?: Number;
   issuer?: String;
   dealName?: String;
   industry?: String;
