@@ -3,5 +3,7 @@ export default interface IColumn {
   field: string;
   sortable?: Boolean;
   filterable?: Boolean;
-  className?: String;
+  headerClass?: String;
+  cellClass?: String;
+  width?: any;
 }
