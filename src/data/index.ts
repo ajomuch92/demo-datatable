@@ -29,17 +29,17 @@ function populateDeal(holding: any): IDeal {
   const deal: IDeal = {};
   const { Id, DealName, IndustryId, Access, AgentId, SourceId, IssuerId } = holding;
   deal.id = Id;
-  deal.issuer = findFieldOnArray(ClientIssuers, IssuerId);
+  deal.issuer = findFieldOnArray(ClientIssuers, IssuerId, 'IssuerName', 'IssuerId');
   deal.dealName = DealName;
-  deal.industry = findFieldOnArray(Industries, IndustryId);
+  deal.industry = findFieldOnArray(Industries, IndustryId, 'IndustryName');
   deal.access = Access === 1 ? 'Public' : 'Private';
-  deal.agent = findFieldOnArray(Agents, AgentId);
-  deal.source = findFieldOnArray(Sources, SourceId);
+  deal.agent = findFieldOnArray(Agents, AgentId, 'CompanyName');
+  deal.source = findFieldOnArray(Sources, SourceId, 'SourceName');
   return deal;
 }
 
-function findFieldOnArray(arr: any[], id: String | Number, field: string = 'Id'): String {
-  const found: any = arr.find((r) => r.Id === id) || {};
+function findFieldOnArray(arr: any[], id: String | Number, field: string, fieldCondition: string = 'Id'): String {
+  const found: any = arr.find((r) => r[fieldCondition] === id) || {};
   return found[field] || '';
 }
 
