@@ -4,7 +4,7 @@
       <input v-if="searchable" type="search" v-model="search" placeholder="Search..." class="py-1 px-2 border-gray-200 border rounded-md"/>
       <div>
         <column-selector v-if="showColumnSelector" :columns="columns" @on-visible-columns="visibleColumns=$event" />
-        <button class="p-2 bg-blue-600 hover:bg-blue-800 text-white rounded-md shadow-sm mx-2" @click="downloadContent">
+        <button v-if="downloadable" class="p-2 bg-blue-600 hover:bg-blue-800 text-white rounded-md shadow-sm mx-2" @click="downloadContent">
           Download
           <icon name="download" />
         </button>
@@ -210,7 +210,7 @@ const columnsFiltered = computed(() => {
   return props.columns;
 });
 
-const totalPages = computed(() => Math.ceil(rowsFiltered.value.length / (rowsPerPage.value as number)));
+const totalPages = computed(() => Math.ceil(rowsFiltered.value.length / (rowsPerPage.value as number)) || 1);
 
 function downloadContent(){
   let csv = '';
